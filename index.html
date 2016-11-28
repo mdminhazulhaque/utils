@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cosmo/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
+    <script src="https://rawgit.com/dleitee/ng-clipboard/master/dist/ng-clipboard.js"></script>
+    <script src="http://hexmen.com/js/sprintf.js"></script>
+    <meta charset="utf-8">
+    <title>MySQL User Utility</title>
+</head>
+
+<body ng-app="app">
+    <div ng-controller="appController" class="container">
+
+        <nav class="navbar navbar-inverse">
+            <ul class="nav navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">MySQL User Utility</a>
+                </li>
+            </ul>
+        </nav>
+
+        <form>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" ng-model="username" placeholder="John">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="text" class="form-control" id="password" ng-model="password" placeholder="12345678">
+            </div>
+            <div class="form-group">
+                <label for="database">Database</label>
+                <input type="text" class="form-control" id="database" ng-model="database" placeholder="foo">
+            </div>
+            <button type="submit" class="btn btn-primary" ng-click="generate_sql()">Generate</button>
+        </form>
+        <br>
+
+        <div class="form-group">
+            <label for="sql">SQL</label>
+            <textarea class="form-control" id="sql" rows="3">{{sql}}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-default" ng-copy="sql">Copy</button>
+
+    </div>
+
+    <script id="jsbin-javascript">
+        var app = angular.module('app', ['ng-clipboard']);
+        app.controller('appController', function($scope, sqlService) {
+            $scope.username = "";
+            $scope.password = "";
+            $scope.database = "";
+            $scope.sql = "";
+
+            $scope.generate_sql = function() {
+                $scope.sql = sqlService.generate($scope.username, $scope.password, $scope.database);
+            };
+        });
+
+        app.factory('sqlService', function() {
+            return {
+                generate: function(username, password, database) {
+                    return sprintf("CREATE USER '%s'@'localhost' IDENTIFIED BY '%s';\n" +
+                        "GRANT ALL PRIVILEGES ON %s . * TO '%s'@'localhost';\n" +
+                        "FLUSH PRIVILEGES;", username, password, database, username);
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>
